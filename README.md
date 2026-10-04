@@ -12,7 +12,7 @@
 | 语录库 | 39 条常见操作，分试探期 / 日常 / 邀约 / 冲突 / 收尾。每条写清「实际效果」和「换成这样」。 |
 | 发前三问 | 三个问题，过一条答不上来就别发。 |
 | 冷静期 | 上头时想发的话写进来，24 小时后系统问你还想不想发。三个选项：不发了 / 改一改再发 / 还是发了。 |
-| 树洞 | 匿名投稿 + 「同款 +1」计数。别人的帖子可以一键存进冷静期。 |
+| 树洞 | **云端共享**，所有人可见。发完刷新或换设备打开都能看到别人发的。支持「同款 +1」和删除自己的帖子。 |
 | 我的 | 本地统计、徽章、数据导出与清空。 |
 
 ### 四档称号
@@ -26,27 +26,39 @@
 
 每档都配了「怎么脱离这一档」的具体动作，从维持现状到一周止损测试。
 
-## 数据存在哪
+## 数据存哪
 
-全部在浏览器 `localStorage`，key 是 `tgg_v1`。不上传、不联网、没有后端。清理浏览器数据会一起清掉，可以在「我的 → 数据」里导出 JSON 备份或直接清空。
+| 数据 | 位置 | 说明 |
+|---|---|---|
+| 树洞帖子 | **云端数据库** | 所有人共享。RLS 开放读、开放发，删除仅限作者本人 |
+| 自测记录、语录进度、冷静期 | 浏览器 localStorage | 只在你这台设备上，不跨设备同步 |
+| 「同款 +1」点过哪些 | 浏览器 localStorage | 防止重复点赞；计数本身存在云端 |
+| 设备标识 `tgg_did` | 浏览器 localStorage | 随机字符串，仅用于标记「这条是我发的」，不收集任何个人信息 |
+
+导出备份在「我的 → 数据 → 导出」，只导本地部分。
 
 ## 部署
 
-纯静态页面，GitHub Pages 从 `main` 分支的 `/docs` 目录发布。
+页面是 `index.html`（仓库根目录），单文件，除云服务 SDK 外零依赖。
+
+### 在线体验
+
+**WorkBuddy 托管（树洞云端版，推荐）**
+https://tiangou.app.workbuddy.host/
+
+树洞需要连云端，其余功能断网也能用。
+
+### GitHub Pages 镜像
+
+页面在仓库根目录，Pages 源设为 `main /`（根目录）。SDK 从 CDN 加载，需要联网。
 
 ```bash
-git init -b main
-git add -A
-git commit -m "feat: 舔狗平台单页应用"
-gh repo create huichengh/tiangou-platform --public --source=. --remote=origin --push \
-  --description "舔狗平台 · 关系投入失衡自测工具。在线演示：https://huichengh.github.io/tiangou-platform/"
-gh api -X POST repos/huichengh/tiangou-platform/pages \
-  -f "source[branch]=main" -f "source[path]=/docs"
+gh api -X PATCH repos/huichengh/tiangou-platform/pages -f "source[path]=/"
 ```
 
 ## 技术说明
 
-单个 HTML 文件，CSS/JS 全内联，零外部依赖（不引 CDN、字体或图表库），图标全部是内联 SVG。断网也能正常打开。
+单个 HTML 文件，CSS/JS 全内联，图标全部是内联 SVG。树洞通过 `@tencent-ai/workbuddy-cloud-sdk`（CDN `@dev` 通道）访问云数据库；读取失败会显示提示和重试按钮，不会静默失败。
 
 ## 一句话说明
 
