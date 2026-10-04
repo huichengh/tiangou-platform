@@ -467,11 +467,15 @@ const $$=(s,r=document)=>Array.from(r.querySelectorAll(s));
 const esc=s=>String(s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
 
 /* ---- 云端客户端 ---- */
+const CLOUD_ENDPOINT="https://tiangou.app.workbuddy.host";
 const cloud=WorkBuddyCloud.createWorkBuddyCloud({
-  endpoint:"https://tiangou.app.workbuddy.host",
+  endpoint:CLOUD_ENDPOINT,
   oauthRelayBaseUrl:"https://www.workbuddy.cn/v2/as/genie-baas/oauth",
   publishableKey:"wbpk_CBJl71ytCH97XJZFnDRQVm_5APqb55fbUeTVbjJ7luFHQshjqgYL76m"
 });
+/* 云服务只认它自己的域名。从别处打开（GitHub Pages、file://、别人转发出去的链接）
+   服务端会返回 403 origin not allowed——这里提前识别并说清楚原因，省得对着空白页猜。*/
+const ORIGIN_OK=(location.origin===CLOUD_ENDPOINT)||/^https?:\/\/(localhost|127\.0\.0\.1)(:\d+)?$/.test(location.origin);
 /* 设备标识：只用于标记「这条是我发的」和限删除自己的帖子，不收集任何个人信息 */
 let MY_ID=localStorage.getItem("tgg_did");
 if(!MY_ID){
@@ -715,16 +719,31 @@ function ago(ts){
   if(s<86400*30) return Math.floor(s/86400)+" 天前";
   return new Date(ts).toLocaleDateString("zh-CN");
 }
-function fState(msg,retry){
-  $("#f-list").innerHTML=`<div class="empty">${esc(msg)}<br>${retry?'<button class="btn ghost sm" id="f-retry" style="margin-top:12px">重试</button>':""}</div>`;
+function fState(msg,retry,html){
+  $("#f-list").innerHTML=`<div class="empty">${html?msg:esc(msg)}${retry?'<br><button class="btn ghost sm" id="f-retry" style="margin-top:12px">重试</button>':""}</div>`;
   const r=$("#f-retry"); if(r) r.onclick=loadFeed;
+}
+/* 打开地址不对时，把原因和正确地址一次说清，别让人对着空白页猜 */
+function fWrongHost(){
+  fState(`树洞是所有人共享的，只有在正式网址下才能连上。<br>你现在打开的是 <code>${esc(location.origin||"本地文件")}</code>。<br>请到 <b>${CLOUD_ENDPOINT}</b> 使用树洞。`,true,true);
 }
 async function loadFeed(){
   fState("正在读取…",false);
-  const {data,error}=await cloud.database.from("posts")
-    .select("id,tag,body,author_id,likes,created_at")
-    .order("created_at",{ascending:false}).limit(100);
-  if(error){ fState("读取失败："+(error.message||"网络异常"),true); return; }
+  if(!ORIGIN_OK){ fWrongHost(); return; }
+  let res;
+  try{
+    res=await cloud.database.from("posts")
+      .select("id,tag,body,author_id,likes,created_at")
+      .order("created_at",{ascending:false}).limit(100);
+  }catch(e){
+    fState("读取失败："+(e&&e.message||"网络异常"),true); return;
+  }
+  const {data,error}=res||{};
+  if(error){
+    const m=error.message||"网络异常";
+    if(/origin|not allowed|403/i.test(m)){ fWrongHost(); return; }
+    fState("读取失败："+m,true); return;
+  }
   POSTS=data||[];
   if(!POSTS.length){
     $("#f-list").innerHTML=`<div class="empty">
@@ -760,11 +779,14 @@ function drawFeed(){
       this.classList.add("on");
       const n=+(this.querySelector("b").textContent)+1;
       this.querySelector("b").textContent=n;
-      const {error}=await cloud.database.from("posts").update({likes:n}).eq("id",id);
-      if(error){
+      let err=null;
+      try{ const r=await cloud.database.from("posts").update({likes:n}).eq("id",id); err=r&&r.error; }
+      catch(e){ err=e; }
+      if(err){
         liked.delete(id); this.classList.remove("on");
         this.querySelector("b").textContent=n-1;
-        toast("没点上，再试一次");
+        const m=(err&&err.message)||"网络异常";
+        toast(/origin|not allowed|403/i.test(m)?"请到正式网址下再点":("没点上，再试一次"));
       }
     };
     el.querySelector(".act-quote").onclick=()=>{
@@ -774,8 +796,13 @@ function drawFeed(){
     const del=el.querySelector(".act-del");
     if(del) del.onclick=async function(){
       if(!confirm("删掉这条？删了就找不回来了。")) return;
-      const {error}=await cloud.database.from("posts").delete().eq("id",id);
-      if(error){ toast("删除失败："+(error.message||"请稍后再试")); return; }
+      let err=null;
+      try{ const r=await cloud.database.from("posts").delete().eq("id",id); err=r&&r.error; }
+      catch(e){ err=e; }
+      if(err){
+        const m=(err&&err.message)||"请稍后再试";
+        toast(/origin|not allowed|403/i.test(m)?"请到正式网址下再删":("删除失败："+m)); return;
+      }
       POSTS=POSTS.filter(x=>x.id!==id); drawFeed(); toast("已删除");
     };
   });
@@ -784,10 +811,18 @@ $("#f-add").onclick=async function(){
   const tx=$("#f-txt").value.trim();
   if(tx.length<2) return toast("多写几个字。");
   if(tx.length>500) return toast("最多 500 字。");
+  if(!ORIGIN_OK) return toast("树洞要在正式网址下才能发布");
   const btn=this; btn.disabled=true; btn.textContent="发布中…";
-  const {error}=await cloud.database.from("posts").insert({tag:$("#f-tag").value,body:tx,author_id:MY_ID});
+  let res;
+  try{ res=await cloud.database.from("posts").insert({tag:$("#f-tag").value,body:tx,author_id:MY_ID}); }
+  catch(e){ res={error:e}; }
   btn.disabled=false; btn.textContent="发布";
-  if(error){ toast("发布失败："+(error.message||"网络异常")); return; }
+  const error=res&&res.error;
+  if(error){
+    const m=error.message||"网络异常";
+    toast(/origin|not allowed|403/i.test(m)?"请到 "+CLOUD_ENDPOINT+" 发布":("发布失败："+m));
+    return;
+  }
   $("#f-txt").value=""; $("#f-cnt").textContent="0 字";
   renderMe(); await loadFeed();
   toast("发出去了");

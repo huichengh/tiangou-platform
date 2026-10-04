@@ -2,7 +2,9 @@
 
 一个单文件网页应用。表面是吐槽站，内核是一个「关系投入失衡」的自测工具。
 
-**在线体验：https://huichengh.github.io/tiangou-platform/**
+**在线体验：https://tiangou.app.workbuddy.host/**
+
+> 树洞必须在上面这个地址下使用，原因见「云端的 Origin 限制」。GitHub Pages 镜像只能看静态内容，树洞会提示连不上。
 
 ## 里面有什么
 
@@ -26,6 +28,22 @@
 
 每档都配了「怎么脱离这一档」的具体动作，从维持现状到一周止损测试。
 
+## 图标
+
+`assets/` 下是基于原图做的一套平台图标（`make_icon.py` 是生成脚本，改构图后重跑即可）：
+
+| 文件 | 用途 | 说明 |
+|---|---|---|
+| `icon-1024.png` / `icon-512.png` | 通用主图 | iOS 风格连续圆角，透明底 |
+| `icon-1024-plain.png` | 无圆角版 | 需要自行加圆角时用 |
+| `apple-touch-icon.png` | iOS 添加到主屏 | 180×180，不透明 |
+| `favicon.ico` | 浏览器标签页 | 含 16/32/48/64/128/256 多尺寸 |
+| `favicon-16/32/64.png` | 浏览器 | 64px 版本同时内联进 HTML 的 `<link rel="icon">`，保证零请求也能显示 |
+
+处理步骤：去红（把原图里的红色批注痕迹转灰）→ 方形裁切（以脸为视觉中心）→ LANCZOS 放大到 1024 → 中值滤波降噪 + UnsharpMask 锐化 → autocontrast 提对比 → iOS 圆角遮罩。
+
+曾试过做「简化版」给小尺寸用，二值化后眉毛眼神全糊了，反而丢了神韵，已放弃——原图在小尺寸下够清晰。
+
 ## 数据存哪
 
 | 数据 | 位置 | 说明 |
@@ -43,10 +61,25 @@
 
 ### 在线体验
 
-**WorkBuddy 托管（树洞云端版，推荐）**
+**WorkBuddy 托管（唯一可用地址）**
 https://tiangou.app.workbuddy.host/
 
 树洞需要连云端，其余功能断网也能用。
+
+### 云端的 Origin 限制（重要）
+
+云服务对 `publishableKey` 做**精确 Origin 匹配**，只接受应用自己的域名
+`https://tiangou.app.workbuddy.host` 和 localhost。从其他地址打开（GitHub Pages、
+`file://` 直接双击 HTML、别人转发出去的链接），所有数据请求都会返回：
+
+```
+403 {"error":"access_denied","error_description":"the request origin is not allowed for this client"}
+```
+
+这不是代码 bug，也无法在前端绕过。页面已内置 `ORIGIN_OK` 自检：从非正式域名打开时，
+树洞区会直接显示正确网址并给出「重试」，不会再出现空白或无声失败。
+
+结论：**要树洞就用 WorkBuddy 托管地址**，镜像站只能看静态内容。
 
 ### GitHub Pages 镜像
 
@@ -56,10 +89,16 @@ https://tiangou.app.workbuddy.host/
 gh api -X PATCH repos/huichengh/tiangou-platform/pages -f "source[path]=/"
 ```
 
+注意：GitHub Pages 上树洞不可用（Origin 不匹配），镜像只作存档和静态预览。
+
 ## 技术说明
 
-单个 HTML 文件，CSS/JS 全内联，图标全部是内联 SVG。树洞通过 `@tencent-ai/workbuddy-cloud-sdk`（CDN `@dev` 通道）访问云数据库；读取失败会显示提示和重试按钮，不会静默失败。
+单个 HTML 文件，CSS/JS 全内联，图标全部是内联 SVG。树洞通过 `@tencent-ai/workbuddy-cloud-sdk`（CDN `@dev` 通道）访问云数据库，数据面路径固定为 `/.cloud/database/rest`。
 
-## 一句话说明
+失败处理：读取、发布、点赞、删除都包了 try-catch，识别到 origin 类错误时提示正确网址，其余错误显示原因并提供「重试」，不会静默失败。
+
+安全边界（服务端强制，前端绕不过）：读和发对所有人开放；删除只能删 `author_id` 与请求头 `x-device-id` 一致的帖子，也就是只能删自己发的。
+
+## 使用前提
 
 本项目用于辅助自查关系中的投入状态，不提供任何话术操控、情绪施压或挽回技巧。涉及明确拒绝或已被要求停止联系的情形，站内建议一律指向「停下」。
