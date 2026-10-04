@@ -325,9 +325,9 @@ select.inp{appearance:none;background-image:url("data:image/svg+xml;utf8,<svg xm
   </div>
   <div class="card">
     <h2>数据</h2>
-    <p class="hint">导出成 JSON 自己留着，或者直接清空。清空不可恢复。</p>
+    <p class="hint">导出成 JSON 自己留着，或者直接清空。导出包含本地数据（自测、冷静期、点过的「同款」）和树洞里所有人发的帖子——树洞只存在云上，没有第二份副本，这个文件是它唯一的备份。清空不可恢复。</p>
     <div style="display:flex;gap:9px">
-      <button class="btn ghost sm" id="me-export" style="flex:1">导出</button>
+      <button class="btn ghost sm" id="me-export" style="flex:1">导出（含树洞）</button>
       <button class="btn ghost sm danger" id="me-clear" style="flex:1">清空全部</button>
     </div>
   </div>
@@ -862,11 +862,42 @@ function renderMe(){
     `<div class="note">冷静期里有 ${sent} 条最后还是发了。不用觉得白存了——存过和没存，区别在你真的等过那 24 小时。真正要看的是「忍住没发」那个数，它现在 ${gone}。`);
 }
 renderMe();
-$("#me-export").onclick=()=>{
-  const b=new Blob([JSON.stringify(S,null,2)],{type:"application/json"});
+/* 导出：本地数据 + 树洞云端帖子。
+   树洞帖子只存在云上，没有第二份副本，这里是唯一的备份入口。*/
+$("#me-export").onclick=async function(){
+  const btn=this; btn.disabled=true; const old=btn.textContent;
+  btn.textContent="导出中…";
+  let posts=null, cloudErr="";
+  try{
+    if(ORIGIN_OK){
+      const r=await cloud.database.from("posts")
+        .select("id,tag,body,author_id,likes,created_at")
+        .order("created_at",{ascending:false}).limit(1000);
+      if(r&&r.error) cloudErr=r.error.message||"读取失败";
+      else posts=(r&&r.data)||[];
+    }else cloudErr="当前打开的地址连不上云端";
+  }catch(e){ cloudErr=(e&&e.message)||"读取失败"; }
+  const out={
+    exported_at:new Date().toISOString(),
+    app:"https://tiangou.app.workbuddy.host/",
+    device_id:MY_ID,
+    local:S,
+    cloud_posts:posts,
+    cloud_note:posts?"":("本次没能读到云端帖子（"+cloudErr+"）。请用正式网址 https://tiangou.app.workbuddy.host/ 重新导出一次。")
+  };
+  const b=new Blob([JSON.stringify(out,null,2)],{type:"application/json"});
   const u=URL.createObjectURL(b);
-  const a=document.createElement("a");a.href=u;a.download="舔狗平台数据.json";a.click();
+  const a=document.createElement("a");a.href=u;
+  a.download="舔狗平台数据-"+new Date().toISOString().slice(0,10)+".json";a.click();
   URL.revokeObjectURL(u);
+  btn.disabled=false; btn.textContent=old;
+  if(posts) toast("已导出，含 "+posts.length+" 条树洞帖子");
+  else{ toast("本地数据已导出，树洞帖子没拿到");
+    if(confirm("本地数据已导出，但云端树洞帖子没读到。\n\n"+
+      "原因："+cloudErr+"\n\n"+
+      "树洞帖子只存在云上，没有备份。要保留下来的话，请到正式网址重新导出：\n"+
+      "https://tiangou.app.workbuddy.host/\n\n现在打开那个地址吗？")) location.href="https://tiangou.app.workbuddy.host/";
+  }
 };
 $("#me-clear").onclick=()=>{
   if(!confirm("清空你在这台设备上的数据？\n\n自测记录、冷静期、点过的「同款」都会没，无法恢复。\n\n注意：树洞里你发的帖子存在云端，不受这个影响——要删请到树洞里删自己那条。")) return;
