@@ -1,0 +1,697 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>舔狗平台</title>
+<style>
+:root{
+  --bg:#faf7f4; --card:#ffffff; --line:#ece5de; --line2:#f5f0ea;
+  --text:#2b2724; --muted:#8a8078; --faint:#b3aaa2;
+  --red:#c9503a; --red-soft:#fbeeeb; --red-line:#f0d3cc;
+  --green:#2f7a63; --green-soft:#eaf4f0; --green-line:#cbe3da;
+  --amber:#b5821c; --amber-soft:#fbf3e2;
+  --shadow:0 1px 2px rgba(43,39,36,.04),0 6px 18px rgba(43,39,36,.05);
+  --r:14px;
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;padding:0}
+body{
+  background:var(--bg); color:var(--text);
+  font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;
+  font-size:15px; line-height:1.65; padding-bottom:80px;
+}
+button{font-family:inherit;font-size:inherit;cursor:pointer;border:none;background:none;color:inherit}
+input,textarea,select{font-family:inherit;font-size:15px;color:inherit}
+
+/* ---------- header ---------- */
+header{
+  background:#fff;border-bottom:1px solid var(--line);
+  padding:22px 18px 18px;
+}
+.hd{max-width:760px;margin:0 auto;display:flex;align-items:flex-start;gap:14px}
+.logo{flex:0 0 auto;margin-top:2px}
+h1{font-size:20px;margin:0 0 4px;letter-spacing:.5px}
+.sub{font-size:12.5px;color:var(--muted);line-height:1.6}
+.hd-note{margin-top:10px;font-size:12px;color:var(--faint);border-left:2px solid var(--line);padding-left:8px}
+
+/* ---------- nav ---------- */
+nav{
+  position:sticky;top:0;z-index:20;background:rgba(250,247,244,.94);
+  backdrop-filter:blur(8px);border-bottom:1px solid var(--line);
+}
+.nav-in{max-width:760px;margin:0 auto;display:flex;overflow-x:auto;scrollbar-width:none}
+.nav-in::-webkit-scrollbar{display:none}
+nav button{
+  flex:1 0 auto;padding:13px 14px;font-size:14px;color:var(--muted);
+  border-bottom:2px solid transparent;white-space:nowrap;transition:.15s;
+}
+nav button.on{color:var(--red);border-bottom-color:var(--red);font-weight:600}
+
+main{max-width:760px;margin:0 auto;padding:18px}
+.page{display:none;animation:fade .18s ease}
+.page.on{display:block}
+@keyframes fade{from{opacity:0;transform:translateY(4px)}to{opacity:1;transform:none}}
+
+/* ---------- card ---------- */
+.card{background:var(--card);border:1px solid var(--line);border-radius:var(--r);padding:18px;margin-bottom:14px;box-shadow:var(--shadow)}
+.card h2{font-size:16px;margin:0 0 4px}
+.card .hint{font-size:13px;color:var(--muted);margin:0 0 14px}
+.sec-t{font-size:13px;color:var(--muted);margin:26px 0 10px;letter-spacing:.4px}
+
+/* ---------- buttons ---------- */
+.btn{
+  display:inline-flex;align-items:center;justify-content:center;gap:6px;
+  padding:11px 18px;border-radius:10px;font-size:14.5px;font-weight:600;
+  background:var(--red);color:#fff;transition:.15s;
+}
+.btn:active{transform:scale(.98);opacity:.9}
+.btn.ghost{background:#fff;color:var(--text);border:1px solid var(--line)}
+.btn.sm{padding:8px 13px;font-size:13px;font-weight:500;border-radius:8px}
+.btn.full{width:100%}
+.btn:disabled{background:#e8e2dc;color:#a89f97;cursor:default}
+
+/* ---------- chips ---------- */
+.chips{display:flex;gap:7px;flex-wrap:wrap;margin-bottom:14px}
+.chip{
+  padding:6px 12px;border-radius:20px;font-size:13px;
+  background:#fff;border:1px solid var(--line);color:var(--muted);transition:.15s;
+}
+.chip.on{background:var(--red);border-color:var(--red);color:#fff}
+
+/* ---------- quiz ---------- */
+.q{border-top:1px solid var(--line2);padding:16px 0}
+.q:first-of-type{border-top:none;padding-top:2px}
+.q-t{font-size:14.5px;font-weight:600;margin-bottom:4px}
+.q-n{font-size:11.5px;color:var(--faint);margin-right:6px;font-weight:400}
+.opts{display:flex;flex-direction:column;gap:7px;margin-top:10px}
+.opt{
+  display:flex;align-items:flex-start;gap:9px;padding:10px 12px;
+  border:1px solid var(--line);border-radius:10px;font-size:14px;
+  color:var(--text);text-align:left;background:#fff;transition:.15s;line-height:1.5;
+}
+.opt .mk{flex:0 0 auto;width:15px;height:15px;border:1.5px solid var(--line);border-radius:50%;margin-top:4px;transition:.15s}
+.opt.sel{border-color:var(--red);background:var(--red-soft)}
+.opt.sel .mk{border-color:var(--red);background:var(--red);box-shadow:inset 0 0 0 3px #fff}
+
+.bar{height:5px;background:var(--line2);border-radius:3px;overflow:hidden;margin:6px 0 14px}
+.bar i{display:block;height:100%;background:var(--red);width:0;transition:width .3s}
+
+/* ---------- result ---------- */
+.score{font-size:44px;font-weight:700;line-height:1.1;letter-spacing:-1px}
+.lv{display:inline-block;padding:4px 11px;border-radius:7px;font-size:13px;font-weight:600;margin-bottom:12px}
+.lv.g{background:var(--green-soft);color:var(--green);border:1px solid var(--green-line)}
+.lv.a{background:var(--amber-soft);color:var(--amber);border:1px solid #ecd9a8}
+.lv.r{background:var(--red-soft);color:var(--red);border:1px solid var(--red-line)}
+.res-body{font-size:14px;line-height:1.8}
+.res-body p{margin:0 0 12px}
+.res-list{margin:0;padding-left:0;list-style:none}
+.res-list li{padding:9px 0 9px 16px;border-top:1px solid var(--line2);font-size:14px;position:relative;line-height:1.65}
+.res-list li:first-child{border-top:none}
+.res-list li:before{content:"";position:absolute;left:0;top:17px;width:5px;height:5px;border-radius:50%;background:var(--faint)}
+.res-foot{margin-top:14px;padding:12px;background:var(--line2);border-radius:10px;font-size:13.5px;color:var(--muted);line-height:1.7}
+
+/* ---------- quote ---------- */
+.qc{border:1px solid var(--line);border-radius:12px;padding:14px;margin-bottom:11px;background:#fff}
+.qc-top{display:flex;gap:10px;align-items:flex-start}
+.qc-mark{flex:0 0 auto;width:22px;height:22px;border-radius:6px;background:var(--red-soft);color:var(--red);font-size:12px;display:flex;align-items:center;justify-content:center;font-weight:700;margin-top:2px}
+.qc-txt{flex:1;font-family:"Songti SC","STSong",serif;font-size:16.5px;line-height:1.6;word-break:break-word}
+.qc-cat{font-size:11.5px;color:var(--faint);flex:0 0 auto;margin-top:4px}
+.qc-d{margin-top:11px;padding-top:11px;border-top:1px dashed var(--line2);display:none}
+.qc.open .qc-d{display:block}
+.qc-row{margin-bottom:10px}
+.qc-row:last-child{margin-bottom:0}
+.qc-row b{display:block;font-size:11.5px;letter-spacing:.5px;margin-bottom:3px}
+.qc-row.r b{color:var(--red)}
+.qc-row.g b{color:var(--green)}
+.qc-row span{font-size:13.5px;color:#4d4741;line-height:1.65}
+.qc-act{display:flex;gap:8px;margin-top:12px}
+.qc-act .btn{flex:1}
+
+/* ---------- three checks ---------- */
+.chk{display:flex;flex-direction:column;gap:9px}
+.chk-i{display:flex;gap:10px;align-items:flex-start;padding:11px 13px;background:#fff;border:1px solid var(--line);border-radius:10px}
+.chk-i .no{flex:0 0 auto;font-size:12px;color:var(--faint);font-weight:700;margin-top:2px}
+.chk-i .q2{font-size:14px;line-height:1.5}
+.chk-i .q2 em{font-style:normal;color:var(--muted);font-size:12.5px;display:block;margin-top:2px}
+
+/* ---------- hold list ---------- */
+.hold{border:1px solid var(--line);border-radius:12px;padding:14px;margin-bottom:11px;background:#fff}
+.hold.pend{border-left:3px solid var(--amber)}
+.hold.ready{border-left:3px solid var(--red);background:#fffdfc}
+.hold.gone{opacity:.6}
+.hold-to{font-size:12.5px;color:var(--muted);margin-bottom:7px}
+.hold-txt{font-size:14.5px;line-height:1.6;word-break:break-word;white-space:pre-wrap}
+.hold-meta{font-size:11.5px;color:var(--faint);margin-top:9px}
+.hold-act{display:flex;gap:7px;margin-top:11px;flex-wrap:wrap}
+.hold-act .btn{flex:1 0 auto}
+
+/* ---------- feed ---------- */
+.fd{border:1px solid var(--line);border-radius:12px;padding:14px;margin-bottom:11px;background:#fff}
+.fd-tag{font-size:11.5px;color:var(--faint);margin-bottom:7px;display:flex;gap:8px;align-items:center}
+.fd-txt{font-size:14.5px;line-height:1.75;word-break:break-word;white-space:pre-wrap}
+.fd-act{display:flex;gap:8px;margin-top:12px;align-items:center}
+.like{padding:6px 12px;border:1px solid var(--line);border-radius:20px;font-size:13px;color:var(--muted);transition:.15s;background:#fff}
+.like.on{border-color:var(--red);color:var(--red);background:var(--red-soft)}
+
+/* ---------- forms ---------- */
+.fld{margin-bottom:13px}
+.fld label{display:block;font-size:13px;color:var(--muted);margin-bottom:6px}
+.inp,textarea.inp{
+  width:100%;padding:11px 12px;border:1px solid var(--line);border-radius:10px;
+  background:#fff;outline:none;transition:.15s;line-height:1.6;
+}
+.inp:focus{border-color:var(--red)}
+textarea.inp{resize:vertical;min-height:96px}
+select.inp{appearance:none;background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'><path d='M2 4l4 4 4-4' fill='none' stroke='%238a8078' stroke-width='1.5' stroke-linecap='round'/></svg>");background-repeat:no-repeat;background-position:right 12px center;padding-right:32px}
+.counter{text-align:right;font-size:11.5px;color:var(--faint);margin-top:5px}
+
+/* ---------- achievements ---------- */
+.ach{display:flex;align-items:center;gap:12px;padding:12px;border:1px solid var(--line);border-radius:11px;margin-bottom:8px;background:#fff}
+.ach.lock{opacity:.42}
+.ach-ic{flex:0 0 auto;width:34px;height:34px;border-radius:9px;display:flex;align-items:center;justify-content:center;font-size:17px;background:var(--line2)}
+.ach.got .ach-ic{background:var(--amber-soft)}
+.ach-t{font-size:14px;font-weight:600}
+.ach-d{font-size:12.5px;color:var(--muted);line-height:1.5}
+.stat{display:grid;grid-template-columns:repeat(2,1fr);gap:9px;margin-bottom:16px}
+.stat-i{background:#fff;border:1px solid var(--line);border-radius:11px;padding:13px}
+.stat-n{font-size:23px;font-weight:700;line-height:1.2;letter-spacing:-.5px}
+.stat-l{font-size:12px;color:var(--muted);margin-top:3px}
+
+.empty{text-align:center;padding:34px 16px;color:var(--faint);font-size:13.5px;line-height:1.7}
+.empty svg{opacity:.4;margin-bottom:10px}
+.note{font-size:12.5px;color:var(--muted);line-height:1.7;background:var(--line2);padding:12px;border-radius:10px;margin-top:14px}
+.danger{color:var(--red)}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="hd">
+    <svg class="logo" width="42" height="42" viewBox="0 0 48 48" fill="none">
+      <circle cx="16" cy="18" r="7.5" fill="#c9503a"/>
+      <circle cx="32" cy="18" r="7.5" fill="#c9503a"/>
+      <ellipse cx="24" cy="32" rx="12" ry="11" fill="#e8a894"/>
+      <circle cx="19.5" cy="31" r="1.9" fill="#3a2b26"/>
+      <circle cx="28.5" cy="31" r="1.9" fill="#3a2b26"/>
+      <ellipse cx="24" cy="35.5" rx="2.6" ry="2" fill="#3a2b26"/>
+      <path d="M24 37.5c0 2.4-2.6 3.6-4.6 2.6M24 37.5c0 2.4 2.6 3.6 4.6 2.6" stroke="#3a2b26" stroke-width="1.4" stroke-linecap="round"/>
+    </svg>
+    <div style="flex:1">
+      <h1>舔狗平台</h1>
+      <div class="sub">互相看看自己舔成什么样了。</div>
+    </div>
+  </div>
+  <div class="hd">
+    <div class="hd-note">数据全部存在你自己浏览器的本地存储里，不上传、不联网。清理浏览器数据会一起清掉。</div>
+  </div>
+</header>
+
+<nav><div class="nav-in" id="nav">
+  <button data-p="test" class="on">舔狗自测</button>
+  <button data-p="quote">语录库</button>
+  <button data-p="hold">冷静期</button>
+  <button data-p="feed">树洞</button>
+  <button data-p="me">我的</button>
+</div></nav>
+
+<main>
+
+<!-- ============ 自测 ============ -->
+<section class="page on" id="p-test">
+  <div class="card">
+    <h2>舔狗指数自测</h2>
+    <p class="hint">12 道题，按你最近三个月的真实情况选。选完立刻出结果，包括建议。</p>
+    <div class="bar"><i id="qbar"></i></div>
+    <div id="qbox"></div>
+    <div style="display:flex;gap:9px;margin-top:16px">
+      <button class="btn ghost sm" id="q-back">上一题</button>
+      <button class="btn full" id="q-next">下一题</button>
+    </div>
+  </div>
+  <div id="q-result"></div>
+</section>
+
+<!-- ============ 语录库 ============ -->
+<section class="page" id="p-quote">
+  <div class="card">
+    <h2>语录库</h2>
+    <p class="hint">24 句常见操作。每条都写了实际效果和一个改法。点开看。</p>
+    <div class="chips" id="qchips"></div>
+    <div id="qlist"></div>
+  </div>
+
+  <div class="card">
+    <h2>发之前过一遍这三问</h2>
+    <p class="hint">三条里有一条答不上来，就先别发。</p>
+    <div class="chk">
+      <div class="chk-i"><span class="no">1</span><div class="q2">这条消息里有她吗？<em>不是"我今天做了什么"，而是"她关心的那部分是什么"。</em></div></div>
+      <div class="chk-i"><span class="no">2</span><div class="q2">她不回的话，这句话有问题吗？<em>如果答案是"那我就完了"，说明你在用她的回复确认自己。</em></div></div>
+      <div class="chk-i"><span class="no">3</span><div class="q2">断掉她会有损失吗？<em>没有损失就别靠这个维持联系。频率不是义务。</em></div></div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ 冷静期 ============ -->
+<section class="page" id="p-hold">
+  <div class="card">
+    <h2>想发的那句话，先放这</h2>
+    <p class="hint">上头的时候写下来。24 小时后系统会问你还想不想发。大部分时候你会不想。</p>
+    <div class="fld">
+      <label>发给谁</label>
+      <input class="inp" id="h-to" placeholder="随便起个代号，别写真名">
+    </div>
+    <div class="fld">
+      <label>你本来想发的话</label>
+      <textarea class="inp" id="h-txt" placeholder="原样写下来，别修饰。"></textarea>
+      <div class="counter" id="h-cnt">0 字</div>
+    </div>
+    <button class="btn full" id="h-add">存进冷静期</button>
+  </div>
+
+  <div class="sec-t" id="h-sec-t">冷静中</div>
+  <div id="h-list"></div>
+</section>
+
+<!-- ============ 树洞 ============ -->
+<section class="page" id="p-feed">
+  <div class="card">
+    <h2>树洞</h2>
+    <p class="hint">匿名投稿，只存在本地。你也可以只是来看看别人是不是也这样。</p>
+    <div class="fld">
+      <label>标签</label>
+      <select class="inp" id="f-tag">
+        <option value="他">他</option><option value="她">她</option>
+        <option value="说不清">说不清</option><option value="我">我</option>
+      </select>
+    </div>
+    <div class="fld">
+      <label>内容</label>
+      <textarea class="inp" id="f-txt" placeholder="写具体的：什么时候、在哪、说了什么。"></textarea>
+      <div class="counter" id="f-cnt">0 字</div>
+    </div>
+    <button class="btn full" id="f-add">发布</button>
+  </div>
+  <div id="f-list"></div>
+</section>
+
+<!-- ============ 我的 ============ -->
+<section class="page" id="p-me">
+  <div class="card">
+    <h2>使用记录</h2>
+    <p class="hint" style="margin-bottom:14px">都在本地。</p>
+    <div class="stat" id="me-stat"></div>
+  </div>
+  <div class="card">
+    <h2>徽章</h2>
+    <p class="hint" style="margin-bottom:14px">有几个徽章的逻辑挺劝人的。</p>
+    <div id="me-ach"></div>
+  </div>
+  <div class="card">
+    <h2>数据</h2>
+    <p class="hint">导出成 JSON 自己留着，或者直接清空。清空不可恢复。</p>
+    <div style="display:flex;gap:9px">
+      <button class="btn ghost sm" id="me-export" style="flex:1">导出</button>
+      <button class="btn ghost sm danger" id="me-clear" style="flex:1">清空全部</button>
+    </div>
+  </div>
+  <div class="card">
+    <div class="note" style="margin:0">
+      最后一句：这个站不是让你别喜欢谁。喜欢谁是你的事，只是别把"她今天没回我"当成对自己的判决。你要是真被拖得很累，或者她明确说过不要联系，那停下来的事是保护自己，不是认输。
+    </div>
+  </div>
+</section>
+
+</main>
+
+<script>
+/* =================== data =================== */
+const QUOTES = [
+{c:"试探期", t:"在吗", r:"她没法判断你要干嘛，回复成本高于内容成本。一般是你先补第二句，第二句更没营养。", g:"直接给事：「刚刷到 xx，想起你说过 xx，那个后来怎么样了？」"},
+{c:"试探期", t:"早安 / 晚安定时打卡", r:"单独看温度不低，连着两周就是任务。她回「嗯嗯」也是在打卡，不是在想你说的话。", g:"一周两三次，而且带一个具体的东西：今天看到了什么、想起了什么。剩下的时候让它空着。"},
+{c:"试探期", t:"「你今天穿得好好看」+配自己九宫格自拍", r:"夸的是她，镜头对着你。话题会跑到你身上，她还得评一句「你也挺帅」。", g:"只夸，不带图。照片她自己有，你发的那张是另一个目的。"},
+{c:"试探期", t:"连发三条没人回，还要发第四条", r:"这三条在她那里已经统一归档为「这个人情绪有点重」。", g:"停在第三条。她不回，你就有信息了。"},
+
+{c:"日常", t:"汇报行程：到图书馆了 / 吃完了 / 睡了吗", r:"你在向她直播，她没要求过。次数多了会变成一种要回应的负担。", g:"她问了再说。主动权留给自己舒服的那一侧。"},
+{c:"日常", t:"自己不舒服硬扛着不说，等她发现", r:"这不是给她机会关心你，是测试她。她大概率发现不了，你多一晚上难受。", g:"需要就说。开口不等于乞讨。"},
+{c:"日常", t:"为了她省下饭钱、不点外卖，说「我不饿」", r:"付出没有回音的时候，身体先扛不住。而且她并不知道，这笔投入在她那边没有账。", g:"先把自己顾好。吃好饭不叫没出息。"},
+{c:"日常", t:"朋友圈发只有她懂的暗语，等她点赞", r:"她看不懂，别人更看不懂。你只是给自己加了层滤镜，看不到回应会更慌。", g:"想说的话直接对她说，不要绕。"},
+{c:"日常", t:"每天复盘今天她对我好像有点不一样", r:"「有点不一样」通常是你自己加的滤镜。当成结论去推理，越推越偏。", g:"只记她说过的原话。原话不会骗你，读多了你自己会烦。"},
+
+{c:"邀约", t:"「有空一起出来吃饭吗」", r:"不给时间和地点，等于把功课推给她。多数结果是她回「最近有点忙」。", g:"给选项：「周三还是周五晚上？你哪个方便。」把定下来的责任放在你这边。"},
+{c:"邀约", t:"提前三天铺垫，发一堆暗示", r:"铺垫越长，她越有机会随口说一句「再看看」。然后你就真的看了三天。", g:"铺垫半天，落地当天定。"},
+
+{c:"邀约", t:"约不出来，回一句「没事你忙」（其实在生气）", r:"她看不出来你在生气，只会觉得这次你脾气好。下次更不会推掉。", g:"想被理解就说清楚。委屈换不来关心，只会让对方不知道你在期待什么。"},
+{c:"邀约", t:"难受的时候约她出来照顾你", r:"这本质上是一张要兑付的账单。她没答应，你会更委屈，因为她「本来可以来」。", g:"自己先处理。真需要再开口，而且要说明白这是请求不是测试。"},
+{c:"邀约", t:"「我到你楼下了」", r:"到了才说。她要么尴尬地换衣服下楼，要么让你白跑一趟，两个人都难受。", g:"到之前说一声在哪等、给个时间。她可以拒绝，你也不至于白等。"},
+
+{c:"冲突", t:"吵完发两千字长文说明", r:"字越多，她越确认这件事很严重，接下来更不想看。你写的时候也一直在回放。", g:"一句「刚才我语气重了，对不起」，然后停。剩下的等她。"},
+{c:"冲突", t:"冷战，等她先来道歉", r:"你等的不是道歉，是确认她还在乎。等不到的那几天，你会越来越忍不住，最后闹得更大。", g:"给台阶：「刚才那事算了，晚上一起去吃饭？」你主动不代表你输。"},
+{c:"冲突", t:"把付出摊开算账：「我为你做了这么多」", r:"付出一旦被当筹码，之前的每一笔都会被重新打折——她开始怀疑你说那些话是不是在算。", g:"不算账。想被看见就说「我想你多陪陪我」，直说反而有效。"},
+{c:"冲突", t:"提别的女生、说有人约我，用来激她", r:"短期能看见反应，长期是把自己变成一个「不安全的人」。而这条路的终点你猜得到。", g:"不玩。你要的是她这个人，不是她的在意程度。"},
+
+{c:"收尾", t:"被明确拒绝后继续送东西", r:"这不是浪漫，是让她为难。她每收一次都要想怎么回绝。她拒绝的是你，不是一箱奶茶。", g:"东西收回来。说一句「明白了，抱歉」，然后真的停。"},
+{c:"收尾", t:"「你要是想清楚了可以找我」", r:"这句话会让她每隔几个月想起你一次，你出不来。她没接，你也放不下。", g:"想断就断干净。留个门是把自己的伤口露着。"},
+{c:"收尾", t:"跟朋友说「我在追她」", r:"你把这段关系定性成了自己的项目，那她就是个可以不交卷的人，你的成败全看她的心情。", g:"别给自己派工。喜欢是喜欢，不是 KPI。"},
+{c:"收尾", t:"分了以后删了又加回来", r:"反复确认的是你自己的不安，不是她的想法。第十次加好友也不会有新答案。", g:"一次处理完。东西还回去，聊天记录删掉，然后去干点别的。"},
+{c:"收尾", t:"拿「舔狗」这个词自嘲", r:"说得多了别人就真用这个词看你，你自己也会顺手接受这个身份。", g:"描述具体的事：「她三周没主动联系过我」。别认领标签，标签会替你决定你是什么样的人。"}
+];
+
+const SEED = [
+ {tag:"她", txt:"今天第 6 次看她上线没。理由是「顺路看看」。", l:12},
+ {tag:"他", txt:"发了 4 条，她回了一个「嗯」。我在想这个「嗯」是懒得回还是不知道回什么。", l:23},
+ {tag:"说不清", txt:"他今天问我在干嘛。我截图截了三张才发出去，怕发错一张显得太刻意。", l:31},
+ {tag:"我", txt:"朋友问我今天怎么老看手机。我说没事。", l:8},
+ {tag:"她", txt:"我生病那天没告诉她。今天她说「你昨天是不是不舒服」，我说没有。她说「你打字比平时慢」。", l:44},
+ {tag:"说不清", txt:"第 7 周了。我这边每周稳定三次主动，她这边大概……我也没算过。算了太难看。", l:52}
+];
+
+const ACHS = [
+ {id:"t1", ic:"◎", t:"入门自测", d:"完成第 1 次自测"},
+ {id:"t3", ic:"◎", t:"反复确认", d:"完成 3 次自测（说明你在意结果）"},
+ {id:"q10", ic:"▤", t:"语录新手", d:"展开 10 条语录"},
+ {id:"q24", ic:"▦", t:"语录全通", d:"展开全部 24 条"},
+ {id:"h1", ic:"◷", t:"忍住了", d:"冷静期里选择「不发了」1 次"},
+ {id:"h5", ic:"◴", t:"忍住了五次", d:"冷静期里选择「不发了」5 次"},
+ {id:"h20", ic:"◵", t:"有点东西", d:"存进冷静期 20 条以上（你上头得很频繁）"},
+ {id:"f1", ic:"✎", t:"说了出来", d:"在树洞发 1 条"},
+ {id:"silent", ic:"·", t:"只做过自测", d:"从没投稿、没存过冷静期"}
+];
+
+/* =================== quiz =================== */
+const QS = [
+ {q:"最近三天的聊天，最后一条通常是谁发的？", o:[["基本都是我",3],["差不多五五开",1],["大多不是我",0]]},
+ {q:"约见面的提议，谁先提？", o:[["我在主动约",3],["互相提",1],["没约过／都是她安排",0]]},
+ {q:"你说过的压力、目标、家里那些事，她记得吗？", o:[["她主动问过",0],["记得一部分",1],["我说完她就转话题了",3]]},
+ {q:"消息发出去，多久没回你会开始反复看手机？", o:[["半小时就慌",3],["几小时会想",2],["基本不会",0]]},
+ {q:"为了维持这段关系，你放弃过什么？", o:[["朋友邀约、健身、实习机会都推过",3],["偶尔推掉一些事",1],["没什么可放弃的",0]]},
+ {q:"你有没有为她改过自己的原则或底线？", o:[["有，为了不让她不高兴",3],["有一些调整",1],["没有",0]]},
+ {q:"你们聊过「我们算什么」吗？", o:[["聊过，有明确答案",0],["提过，被含糊过去了",2],["没敢提",3]]},
+ {q:"她的朋友圈和聊天里，你出现过几次？", o:[["经常出现，还被介绍过",0],["有几次",1],["基本只有我认识她",3]]},
+ {q:"最近一个月，你的投入是？", o:[["明显变多了",3],["差不多",1],["在减少",0]]},
+ {q:"她拒绝过你的请求吗？被拒绝之后你怎么处理的？", o:[["她拒绝，我正常接受",0],["拒绝过一两次，我有点难受但没说",2],["她一拒绝我就道歉、加倍付出",3]]},
+ {q:"你的朋友知道这个人吗？他们怎么说？", o:[["知道，也知道我什么情况，但他们支持我",0],["他们提醒过我",2],["他们让我别想了，她还在谈",3]]},
+ {q:"如果她明天明确说「我们不合适」，你第一反应是？", o:[["接受，然后调整自己",0],["难受一两周，但走得出来",1],["想立刻再争取，或者很久缓不过来",3]]}
+];
+
+const LEVELS = [
+ {min:0,max:9,k:"g",n:"基本健康",t:"你这个分数低得有点不像在舔狗。",
+  b:["你在投入，但没把自己搭进去。12 题里你的选择大多落在「她也有份」的选项上，这说明她是有回应的。",
+     "要注意的是别因为现在还行就开始加码——多数失衡都是从「现在挺好」开始加的，加到自己刹不住。",
+     "维持现在这样：她约你就去，她忙你就自己安排。别把她的时间表当成你的日程表。"]},
+ {min:10,max:17,k:"a",n:"轻度失衡",t:"有点上头，但还在可控范围。",
+  b:["投入比回报多，你心里清楚，只是不太想承认。这个阶段的危险不在于对方，在于你会开始为她的每一次不回应找解释。",
+     "你可能正在做的事：用加倍付出去对冲焦虑，而不是因为她真的需要。这个逻辑跑久了，人会很累，而且对方完全感知不到你在付。",
+     "先做一件小事就行：这周找两次她没参与的场合（不是约她，是你自己去），看看你回来之后还想不想发消息。想发就发，那时候发是正常社交，不发也没关系。"]},
+ {min:18,max:25,k:"r",n:"中度失衡",t:"你已经不在恋爱里，你在等一个结果。",
+  b:["这个分数下，你大部分情绪的波动来源已经不是她做了什么，而是你今天有没有得到回应。12 道题里你至少 6 道选了失衡那一侧，这不是巧合。",
+     "具体表现大概是：她在的时候你很好，她一忙你开始翻聊天记录找语气问题；你说不出口的不是「想她」，是「她是不是没那么喜欢我」。",
+     "建议做两件事。第一，把「我们到底什么关系」问出来，别再试探了——你现在所有的不确定都是自己给自己留的悬念，而悬念会一直耗着你。第二，问之前想好答案：如果她说「没想过」，你要能接受，不能接受就别问，问了只是逼她表态。",
+     "如果问完发现她给的是含糊答案，那本身就是答案，只是不好听。"]},
+ {min:26,max:36,k:"r",n:"重度失衡",t:"说句不好听的：你现在的状态不叫喜欢，叫损耗。",
+  b:["12 题几乎全在失衡侧。这通常意味着你已经把这段关系当成生活的支撑结构了——它塌一点，你整个人就晃。",
+     "此时你最该做的不是想办法让她更喜欢你，是先把自己捞回来。因为你现在做的每一个「追」的动作，效果都不是加分，是让她更知道怎么应付你。",
+     "接下来一周：不见她、不联系她、把想发的都写进冷静期。不是赌气，是让你看清楚——你到底还喜不喜欢她，还是只是不甘心。不甘心和喜欢，长得特别像，但处理方式完全不一样。",
+     "一周之后如果你还是想找她，那就想清楚一件事：你是想和她在一起，还是想结束那种等着的状态。这两个答案不冲突，但需要的做法不一样。",
+     "如果她之前明确说过「别联系了」或者你们其实已经有对象而你在介入——那这一栏的答案不是策略问题，是停下。"]
+}];
+
+/* =================== store =================== */
+const K="tgg_v1";
+const DEF={tests:[], read:[], hold:[], posts:[], last:{}};
+let S;
+try{ S=JSON.parse(localStorage.getItem(K))||structuredClone(DEF); }catch(e){ S=structuredClone(DEF); }
+for(const k of Object.keys(DEF)) if(S[k]===undefined) S[k]=structuredClone(DEF[k]);
+const save=()=>localStorage.setItem(K,JSON.stringify(S));
+const $=(s,r=document)=>r.querySelector(s);
+const $$=(s,r=document)=>Array.from(r.querySelectorAll(s));
+const esc=s=>String(s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+
+/* =================== nav =================== */
+$$("#nav button").forEach(b=>b.onclick=()=>{
+  $$("#nav button").forEach(x=>x.classList.remove("on"));
+  b.classList.add("on");
+  $$(".page").forEach(p=>p.classList.remove("on"));
+  $("#p-"+b.dataset.p).classList.add("on");
+  window.scrollTo({top:0,behavior:"smooth"});
+});
+
+/* =================== quiz =================== */
+let qi=0, ans=new Array(QS.length).fill(-1);
+function drawQ(){
+  const box=$("#qbox"); box.innerHTML="";
+  const q=QS[qi];
+  const d=document.createElement("div"); d.className="q";
+  d.innerHTML=`<div class="q-t"><span class="q-n">${qi+1}/${QS.length}</span>${esc(q.q)}</div><div class="opts"></div>`;
+  const ow=d.querySelector(".opts");
+  q.o.forEach(([tx,sc],i)=>{
+    const b=document.createElement("button");
+    b.className="opt"+(ans[qi]===i?" sel":"");
+    b.innerHTML=`<span class="mk"></span><span>${esc(tx)}</span>`;
+    b.onclick=()=>{ans[qi]=i;drawQ();};
+    ow.appendChild(b);
+  });
+  box.appendChild(d);
+  $("#qbar").style.width=((qi)/QS.length*100)+"%";
+  $("#q-back").disabled=qi===0;
+  $("#q-next").textContent=qi===QS.length-1?"看结果":"下一题";
+}
+$("#q-next").onclick=()=>{
+  if(ans[qi]===-1) return;
+  if(qi<QS.length-1){qi++;drawQ();}
+  else showRes();
+};
+$("#q-back").onclick=()=>{if(qi>0){qi--;drawQ();}};
+drawQ();
+
+function showRes(){
+  let sc=0, marks=[];
+  ans.forEach((a,i)=>{ sc+=QS[i].o[a][1]; if(QS[i].o[a][1]>=3) marks.push(QS[i].q); });
+  const L=LEVELS.find(l=>sc>=l.min&&sc<=l.max);
+  const pct=Math.round(sc/36*100);
+  $("#qbar").style.width="100%";
+  S.tests.push({d:Date.now(),sc,lv:L.n});
+  S.last={d:Date.now(),sc,lv:L.n};
+  save(); renderMe();
+
+  const wrap=$("#q-result");
+  wrap.innerHTML=`
+  <div class="card">
+    <h2>结果</h2>
+    <p class="hint">${esc(new Date().toLocaleDateString("zh-CN"))} · 满分 36</p>
+    <div class="score">${sc}<span style="font-size:17px;color:var(--faint);font-weight:500"> / 36</span></div>
+    <div class="lv ${L.k}">${L.n} · 失衡占比 ${pct}%</div>
+    <div class="res-body">
+      <p style="color:var(--muted)">${esc(L.t)}</p>
+      <ul class="res-list">${L.b.map(x=>`<li>${esc(x)}</li>`).join("")}</ul>
+      ${marks.length?`<div class="res-foot">你在这 ${marks.length} 道题上选了失衡那一侧：<br>· ${marks.map(esc).join("<br>· ")}</div>`:`<div class="res-foot">12 道题全部选在健康或中间那一侧，没什么明显的失衡信号。</div>`}
+    </div>
+    <div style="display:flex;gap:9px;margin-top:16px">
+      <button class="btn ghost sm" style="flex:1" onclick="window.scrollTo({top:0,behavior:'smooth'})">回去看我的选择</button>
+      <button class="btn" style="flex:1" id="q-again">重新测</button>
+    </div>
+    <div class="note">这个分数只反映你现在的投入和感受，不评价她，也不预测结果。别拿它当判决，也别为了好看故意选健康那一侧——选了不准，后面的建议就没用了。</div>
+  </div>`;
+  $("#q-again").onclick=()=>{qi=0;ans.fill(-1);$("#q-result").innerHTML="";drawQ();window.scrollTo({top:0,behavior:"smooth"});};
+  wrap.scrollIntoView({behavior:"smooth",block:"start"});
+}
+
+/* =================== quotes =================== */
+const CATS=["全部","试探期","日常","邀约","冲突","收尾"];
+let cat="全部";
+CATS.forEach(c=>{
+  const b=document.createElement("button");
+  b.className="chip"+(c===cat?" on":""); b.textContent=c;
+  b.onclick=()=>{cat=c;$$("#qchips .chip").forEach(x=>x.classList.remove("on"));b.classList.add("on");drawQ2();};
+  $("#qchips").appendChild(b);
+});
+function drawQ2(){
+  const L=QUOTES.map((q,i)=>({...q,i})).filter(q=>cat==="全部"||q.c===cat);
+  $("#qlist").innerHTML=L.map(q=>`
+    <div class="qc" data-i="${q.i}">
+      <div class="qc-top">
+        <div class="qc-mark">${q.i+1}</div>
+        <div class="qc-txt">${esc(q.t)}</div>
+        <div class="qc-cat">${q.c}</div>
+      </div>
+      <div class="qc-d">
+        <div class="qc-row r"><b>实际效果</b><span>${esc(q.r)}</span></div>
+        <div class="qc-row g"><b>换成这样</b><span>${esc(q.g)}</span></div>
+      </div>
+      <div class="qc-act">
+        <button class="btn ghost sm act-open">${q._o?"收起":"看实际效果"}</button>
+        <button class="btn sm act-copy">复制原文</button>
+      </div>
+    </div>`).join("");
+  $$("#qlist .qc").forEach(el=>{
+    const i=+el.dataset.i;
+    el.querySelector(".act-open").onclick=function(){
+      el.classList.toggle("open");
+      this.textContent=el.classList.contains("open")?"收起":"看实际效果";
+      if(el.classList.contains("open")&&!S.read.includes(i)){S.read.push(i);save();renderMe();}
+    };
+    el.querySelector(".act-copy").onclick=function(){
+      const t=QUOTES[i].t; this.textContent="已复制";
+      navigator.clipboard?.writeText(t).catch(()=>{});
+      setTimeout(()=>this.textContent="复制原文",1400);
+    };
+  });
+}
+drawQ2();
+
+/* =================== hold =================== */
+const HKEY="h_to", HTKEY="h_txt";
+$("#h-to").value=localStorage.getItem(HKEY)||"";
+$("#h-txt").value=localStorage.getItem(HTKEY)||"";
+$("#h-txt").oninput=e=>{
+  $("#h-cnt").textContent=e.target.value.length+" 字";
+  localStorage.setItem(HTKEY,e.target.value);
+};
+$("#h-to").oninput=e=>localStorage.setItem(HKEY,e.target.value);
+$("#h-add").onclick=()=>{
+  const to=$("#h-to").value.trim()||"没署名";
+  const tx=$("#h-txt").value.trim();
+  if(!tx) return alert("写下来吧，就一句也行。");
+  S.hold.unshift({id:Date.now(),to,tx,t:Date.now(),st:"pend"});
+  save(); $("#h-txt").value=""; localStorage.removeItem(HTKEY); $("#h-cnt").textContent="0 字";
+  drawHold(); renderMe();
+};
+function hh(ts){
+  let s=Math.floor((Date.now()-ts)/1000);
+  if(s<60) return s+" 秒";
+  if(s<3600) return Math.floor(s/60)+" 分钟";
+  if(s<86400) return Math.floor(s/3600)+" 小时";
+  return Math.floor(s/86400)+" 天";
+}
+function drawHold(){
+  const box=$("#h-list"); box.innerHTML="";
+  if(!S.hold.length){
+    $("#h-sec-t").textContent="冷静中";
+    box.innerHTML=`<div class="empty">
+      <svg width="44" height="44" viewBox="0 0 24 24" fill="none" stroke="#b3aaa2" stroke-width="1.3"><path d="M12 3v9l5 3"/><circle cx="12" cy="13" r="9"/></svg>
+      <div>现在没有待发的话。<br>等你想发又怕后悔的时候，回来这里写。</div></div>`;
+    return;
+  }
+  const groups={pend:[],ready:[],sent:[],gone:[]};
+  S.hold.forEach(h=>{ h.st = h.st==="pend" && Date.now()-h.t>86400000 ? "ready" : h.st; groups[h.st].push(h); });
+  save();
+  const title={pend:"冷静中（24 小时后问你一次）",ready:"可以决定了",sent:"已发送",gone:"没发"};
+  ["ready","pend","sent","gone"].forEach(k=>{
+    if(!groups[k].length) return;
+    const t=document.createElement("div");
+    t.className="sec-t"; t.textContent=title[k]+" · "+groups[k].length;
+    box.appendChild(t);
+    groups[k].forEach(h=>{
+      const d=document.createElement("div");
+      d.className="hold "+h.st;
+      const overdue=Date.now()-h.t;
+      let meta;
+      if(h.st==="pend") meta=`存了 ${hh(h.t)} · 还有 ${hh(h.t+86400000)} 到点`;
+      else if(h.st==="ready") meta=`存了 ${hh(h.t)} · 已经过了 ${Math.floor(overdue/3600000)} 小时`;
+      else if(h.st==="sent") meta=`存了 ${hh(h.t)} · 最后还是发了`;
+      else meta=`存了 ${hh(h.t)} · 你没发`;
+      d.innerHTML=`<div class="hold-to">发给：${esc(h.to)}</div>
+        <div class="hold-txt">${esc(h.tx)}</div>
+        <div class="hold-meta">${meta}</div>
+        <div class="hold-act"></div>`;
+      const a=d.querySelector(".hold-act");
+      const mk=(t,fn,cls="btn ghost sm")=>{const b=document.createElement("button");b.className=cls;b.textContent=t;b.onclick=fn;a.appendChild(b);};
+      if(h.st==="ready"){
+        mk("不发了",()=>{h.st="gone";save();drawHold();renderMe();},"btn sm");
+        mk("改一改再发",()=>{
+          const v=prompt("改成：",h.tx);
+          if(v===null)return; if(!v.trim())return;
+          h.tx=v.trim(); h.st="pend"; h.t=Date.now(); save(); drawHold();
+        });
+        mk("还是发了",()=>{h.st="sent";save();drawHold();renderMe();},"btn sm");
+      }else if(h.st==="pend"){
+        mk("撤回这条",()=>{S.hold=S.hold.filter(x=>x.id!==h.id);save();drawHold();renderMe();},"btn sm");
+      }else{
+        mk("删掉",()=>{S.hold=S.hold.filter(x=>x.id!==h.id);save();drawHold();renderMe();},"btn sm");
+        if(h.st==="sent") mk("再放回冷静期",()=>{h.st="pend";h.t=Date.now();save();drawHold();},"btn sm");
+      }
+      box.appendChild(d);
+    });
+  });
+}
+drawHold();
+
+/* =================== feed =================== */
+$("#f-txt").oninput=e=>$("#f-cnt").textContent=e.target.value.length+" 字";
+$("#f-add").onclick=()=>{
+  const tx=$("#f-txt").value.trim();
+  if(tx.length<2) return alert("多写几个字。");
+  S.posts.unshift({id:Date.now(),tag:$("#f-tag").value,tx,t:Date.now(),l:0});
+  save(); $("#f-txt").value=""; $("#f-cnt").textContent="0 字"; drawFeed(); renderMe();
+};
+function drawFeed(){
+  const all=[...S.posts,...SEED.map((s,i)=>({...s,seed:true,i}))].sort((a,b)=>b.t-a.t||(a.seed?1:-1));
+  const box=$("#f-list");
+  if(!all.length){box.innerHTML="";return;}
+  box.innerHTML=`<div class="sec-t">全部 · ${all.length}</div>`+all.map((p,i)=>`
+    <div class="fd" data-i="${i}">
+      <div class="fd-tag">#${esc(p.tag)}${p.seed?"":` · 你发的`}</div>
+      <div class="fd-txt">${esc(p.tx)}</div>
+      <div class="fd-act">
+        <button class="like${p.l?" on":""}">同款 +1 <b style="font-weight:600">${p.l}</b></button>
+        <button class="btn ghost sm act-quote">存到冷静期</button>
+      </div>
+    </div>`).join("");
+  $$("#f-list .fd").forEach((el,i)=>{
+    const p=all[i];
+    el.querySelector(".like").onclick=function(){ p.l++; save(); this.classList.add("on"); this.querySelector("b").textContent=p.l; };
+    el.querySelector(".act-quote").onclick=()=>{
+      S.hold.unshift({id:Date.now(),to:p.tag,tx:"[从树洞存来的] "+p.tx,t:Date.now(),st:"pend"});
+      save(); drawHold(); renderMe();
+      $(".nav-in").children[2].click();
+    };
+  });
+}
+drawFeed();
+
+/* =================== me =================== */
+function renderMe(){
+  const held=S.hold.length, gone=S.hold.filter(h=>h.st==="gone").length, sent=S.hold.filter(h=>h.st==="sent").length;
+  $("#me-stat").innerHTML=[
+    [S.tests.length,"自测次数"],[S.read.length+"/"+QUOTES.length,"看过的语录"],
+    [held,"存进冷静期"],[gone,"忍住没发"]
+  ].map(([n,l])=>`<div class="stat-i"><div class="stat-n">${n}</div><div class="stat-l">${l}</div></div>`).join("");
+
+  const got=new Set();
+  if(S.tests.length>=1)got.add("t1");
+  if(S.tests.length>=3)got.add("t3");
+  if(S.read.length>=10)got.add("q10");
+  if(S.read.length>=24)got.add("q24");
+  if(gone>=1)got.add("h1");
+  if(gone>=5)got.add("h5");
+  if(held>=20)got.add("h20");
+  if(S.posts.length>=1)got.add("f1");
+  if(!S.posts.length&&!held&&S.tests.length>=1)got.add("silent");
+
+  $("#me-ach").innerHTML=ACHS.map(a=>{
+    const has=got.has(a.id);
+    return `<div class="ach ${has?"got":"lock"}">
+      <div class="ach-ic">${has?a.ic:"🔒"}</div>
+      <div><div class="ach-t">${a.t}</div><div class="ach-d">${a.d}</div></div>
+    </div>`;
+  }).join("");
+
+  if(sent>0) $("#me-ach").insertAdjacentHTML("beforeend",
+    `<div class="note">冷静期里有 ${sent} 条最后还是发了。不用觉得白存了——存过和没存，区别在你真的等过那 24 小时。真正要看的是「忍住没发」那个数，它现在 ${gone}。`);
+}
+renderMe();
+$("#me-export").onclick=()=>{
+  const b=new Blob([JSON.stringify(S,null,2)],{type:"application/json"});
+  const u=URL.createObjectURL(b);
+  const a=document.createElement("a");a.href=u;a.download="舔狗平台数据.json";a.click();
+  URL.revokeObjectURL(u);
+};
+$("#me-clear").onclick=()=>{
+  if(!confirm("清空全部本地数据？自测记录、冷静期、树洞都会没，无法恢复。")) return;
+  S=structuredClone(DEF); save();
+  qi=0;ans.fill(-1);$("#q-result").innerHTML="";drawQ();
+  drawQ2();drawHold();drawFeed();renderMe();
+};
+</script>
+</body>
+</html>
