@@ -96,10 +96,22 @@ main{max-width:760px;margin:0 auto;padding:18px}
 
 .bar{height:5px;background:var(--line2);border-radius:3px;overflow:hidden;margin:6px 0 14px}
 .bar i{display:block;height:100%;background:var(--red);width:0;transition:width .3s}
+.tip{font-size:13px;min-height:20px;margin-top:2px;color:var(--muted);transition:.15s}
+.tip.warn{color:var(--red);font-weight:600}
+@keyframes shake{10%,90%{transform:translateX(-1px)}20%,80%{transform:translateX(2px)}30%,50%,70%{transform:translateX(-4px)}40%,60%{transform:translateX(4px)}}
+.shake{animation:shake .4s}
 
 /* ---------- result ---------- */
 .score{font-size:44px;font-weight:700;line-height:1.1;letter-spacing:-1px}
-.lv{display:inline-block;padding:4px 11px;border-radius:7px;font-size:13px;font-weight:600;margin-bottom:12px}
+.lv{display:inline-block;padding:5px 13px;border-radius:8px;font-size:15px;font-weight:700;margin-bottom:8px}
+.lvsub{font-size:12.5px;color:var(--muted);margin:0 0 14px}
+.fixbox{margin-top:18px;padding:15px;background:var(--line2);border-radius:12px}
+.fix-t{font-size:13.5px;font-weight:700;margin-bottom:11px;display:flex;align-items:center;gap:7px}
+.fix-t:before{content:"";width:3px;height:13px;background:var(--red);border-radius:2px;flex:0 0 auto}
+.fix-l{margin:0;padding-left:19px}
+.fix-l li{font-size:14px;line-height:1.7;margin-bottom:9px;color:#3d3833}
+.fix-l li:last-child{margin-bottom:0}
+.fix-l li::marker{color:var(--red);font-weight:700}
 .lv.g{background:var(--green-soft);color:var(--green);border:1px solid var(--green-line)}
 .lv.a{background:var(--amber-soft);color:var(--amber);border:1px solid #ecd9a8}
 .lv.r{background:var(--red-soft);color:var(--red);border:1px solid var(--red-line)}
@@ -224,6 +236,7 @@ select.inp{appearance:none;background-image:url("data:image/svg+xml;utf8,<svg xm
     <p class="hint">12 道题，按你最近三个月的真实情况选。选完立刻出结果，包括建议。</p>
     <div class="bar"><i id="qbar"></i></div>
     <div id="qbox"></div>
+    <div class="tip" id="q-tip"></div>
     <div style="display:flex;gap:9px;margin-top:16px">
       <button class="btn ghost sm" id="q-back">上一题</button>
       <button class="btn full" id="q-next">下一题</button>
@@ -236,7 +249,7 @@ select.inp{appearance:none;background-image:url("data:image/svg+xml;utf8,<svg xm
 <section class="page" id="p-quote">
   <div class="card">
     <h2>语录库</h2>
-    <p class="hint">24 句常见操作。每条都写了实际效果和一个改法。点开看。</p>
+    <p class="hint" id="q-count">39 条常见操作。每条都写了实际效果和一个改法。点开看。</p>
     <div class="chips" id="qchips"></div>
     <div id="qlist"></div>
   </div>
@@ -354,7 +367,24 @@ const QUOTES = [
 {c:"收尾", t:"「你要是想清楚了可以找我」", r:"这句话会让她每隔几个月想起你一次，你出不来。她没接，你也放不下。", g:"想断就断干净。留个门是把自己的伤口露着。"},
 {c:"收尾", t:"跟朋友说「我在追她」", r:"你把这段关系定性成了自己的项目，那她就是个可以不交卷的人，你的成败全看她的心情。", g:"别给自己派工。喜欢是喜欢，不是 KPI。"},
 {c:"收尾", t:"分了以后删了又加回来", r:"反复确认的是你自己的不安，不是她的想法。第十次加好友也不会有新答案。", g:"一次处理完。东西还回去，聊天记录删掉，然后去干点别的。"},
-{c:"收尾", t:"拿「舔狗」这个词自嘲", r:"说得多了别人就真用这个词看你，你自己也会顺手接受这个身份。", g:"描述具体的事：「她三周没主动联系过我」。别认领标签，标签会替你决定你是什么样的人。"}
+{c:"收尾", t:"拿「舔狗」这个词自嘲", r:"说得多了别人就真用这个词看你，你自己也会顺手接受这个身份。", g:"描述具体的事：「她三周没主动联系过我」。别认领标签，标签会替你决定你是什么样的人。"},
+
+{c:"试探期", t:"「我最近在忙什么」报备式长文", r:"没人要求你交行程。信息量再大，对方也只会回个「挺好的」，你还得再找话题续上。", g:"想说就说单件事，说完就停。真想让她了解你，约一次比发二十条有用。"},
+{c:"试探期", t:"秒回她，然后数她多久回你", r:"你把这段对话变成了计时器。她回得慢你开始算她不在意，她回得快你又开始想是不是敷衍。", g:"发完就去干别的。把回不回这件事从你的即时视野里移出去。"},
+{c:"试探期", t:"拿自己跟别人比：「他就没这样对她」", r:"你赢了一个不存在的对手。她没在比较，你却在比赛，这场比赛只有你在打分。", g:"不比。你不知道别人聊了什么、什么关系、什么阶段，比出来的结论一定是错的。"},
+{c:"日常", t:"她发来一张自拍，你回「好看」两个字", r:"两个字她给不出任何东西接，只能不回或者回个表情。话头就这样断了。", g:"具体一点：「这件外套上次你在哪买的？」——有细节的夸奖能聊下去，空的不能。"},
+{c:"日常", t:"每天中午定时发「吃饭了吗」", r:"第一周是关心，第三周是打卡，第五周她开始不回，而你把不回理解成今天心情不好。", g:"不定时。有事说事，没事不说。让「吃饭了吗」重新变回一句真的问话。"},
+{c:"日常", t:"她说「随便」，你精心选了半小时餐厅", r:"她给的是一个敷衍选项，你当成了真实偏好。点完还要问「是不是不喜欢」，等于把压力推回给她。", g:"遇到「随便」直接给两个具体选项让她二选一，比你猜她想要哪个省事。"},
+{c:"日常", t:"她一整天没回，你把聊天记录从头翻一遍找语气问题", r:"同一段对话第七遍看，每一遍都能找到新的「问题」。你不是在找证据，你是在给自己找难受的理由。", g:"手机放下。真的会出问题的话，第四遍的时候你就想得起来。"},
+{c:"日常", t:"把她说过的小事记在本子上，专门找机会提起", r:"本意是想让她觉得你用心。但实际效果是每提起一次，你就在提醒自己「我记得这么清楚，而她连这个都没提」。", g:"记住细节是为了不漏掉她在意的事，不是为了有话题可用。别把记性用在展示上。"},
+{c:"邀约", t:"约她，她说要问朋友", r:"「问朋友」通常是委婉的「不」。你等的那个回复不会来，因为她也在等自己找个理由推掉。", g:"她说要问，你就说「好，问到了告诉我」。这句把你从等待者变成了不施压的人，也给她留了退路。"},
+{c:"邀约", t:"她说今天不想见，但你要视频通话「也算见面」", r:"她拒绝的是见面的形式，不是见你。你绕过她的拒绝，对方只会更想躲开。", g:"她说不想见，那就不见。真的想视频可以直接问，但要接受她说不用。"},
+{c:"冲突", t:"「我也是为你好」", r:"这句话一出口，你的立场就从「我的感受」变成了「她该怎么做」。她听到的是被指责，不是被关心。", g:"只讲你能确认的：「我昨天有点难受，因为你没回我消息」。只说自己，不定义她。"},
+{c:"冲突", t:"发「你要是爱我就应该……」", r:"这是把感情当成合同在讨债。对方没法签字，只能躲。而且这类话一旦说出口，很难修回来。", g:"直接说需求：「我希望你晚上能多回我两句消息」。可谈，不用她用爱来担保。"},
+{c:"冲突", t:"跟兄弟吐槽她之后，又去找她道歉", r:"你把她的私事说出去只是为了泄愤，她要承担的是被议论的后果，道歉不能撤销这件事。", g:"想骂就骂，但要挡住她的名字。朋友之间可以不带身份地吐槽，说完自己消化。"},
+{c:"冲突", t:"每次吵完都主动认错，哪怕不是你的错", r:"你把「对错」当成了「她别生气」的工具。次数多了，你已经不知道自己真实的立场是什么了。", g:"该认就认，不该认就说明白。永远先让步的人，最后连让什么都要问对方要许可。"},
+{c:"收尾", t:"她冷淡了，你就加倍对她好", r:"加倍的不是感情，是压力。她那边的感受没变，你这边成本变高了。", g:"关系是双向的。对方没动的时候你先动，叫你自己加码，不叫努力。"},
+{c:"收尾", t:"「我给你写了封信，你有空看看」", r:"长篇告白把压力全推给对方——她必须给一个匹配这个分量的回应，稍微冷淡一点都显得她的错。", g:"想说就用三句话说清楚，然后给她轻松回应的空间。分量的平衡是双向的。"}
 ];
 
 const SEED = [
@@ -370,7 +400,7 @@ const ACHS = [
  {id:"t1", ic:"◎", t:"入门自测", d:"完成第 1 次自测"},
  {id:"t3", ic:"◎", t:"反复确认", d:"完成 3 次自测（说明你在意结果）"},
  {id:"q10", ic:"▤", t:"语录新手", d:"展开 10 条语录"},
- {id:"q24", ic:"▦", t:"语录全通", d:"展开全部 24 条"},
+ {id:"q24", ic:"▦", t:"语录全通", d:"展开全部语录"},
  {id:"h1", ic:"◷", t:"忍住了", d:"冷静期里选择「不发了」1 次"},
  {id:"h5", ic:"◴", t:"忍住了五次", d:"冷静期里选择「不发了」5 次"},
  {id:"h20", ic:"◵", t:"有点东西", d:"存进冷静期 20 条以上（你上头得很频繁）"},
@@ -395,26 +425,41 @@ const QS = [
 ];
 
 const LEVELS = [
- {min:0,max:9,k:"g",n:"基本健康",t:"你这个分数低得有点不像在舔狗。",
+ {min:0,max:9,k:"g",n:"基本健康",tag:"西格玛男人",t:"你这个分数低得有点不像在舔狗。",
   b:["你在投入，但没把自己搭进去。12 题里你的选择大多落在「她也有份」的选项上，这说明她是有回应的。",
      "要注意的是别因为现在还行就开始加码——多数失衡都是从「现在挺好」开始加的，加到自己刹不住。",
-     "维持现在这样：她约你就去，她忙你就自己安排。别把她的时间表当成你的日程表。"]},
- {min:10,max:17,k:"a",n:"轻度失衡",t:"有点上头，但还在可控范围。",
+     "维持现在这样：她约你就去，她忙你就自己安排。别把她的时间表当成你的日程表。"],
+  fix:["把「主动联系」和「等回应」的时间分开。给自己留一件不用等她参与也能做完的事，每周至少两次。",
+       "记一个数：她主动找过你的次数。这个数字比你的付出更能说明关系状态，一个月看一次就够。",
+       "别试探。她回得慢的时候不要在心里替她编原因，那是你在写剧本，不是她在给信号。"]},
+ {min:10,max:17,k:"a",n:"轻度失衡",tag:"间歇性发作",t:"有点上头，但还在可控范围。",
   b:["投入比回报多，你心里清楚，只是不太想承认。这个阶段的危险不在于对方，在于你会开始为她的每一次不回应找解释。",
      "你可能正在做的事：用加倍付出去对冲焦虑，而不是因为她真的需要。这个逻辑跑久了，人会很累，而且对方完全感知不到你在付。",
-     "先做一件小事就行：这周找两次她没参与的场合（不是约她，是你自己去），看看你回来之后还想不想发消息。想发就发，那时候发是正常社交，不发也没关系。"]},
- {min:18,max:25,k:"r",n:"中度失衡",t:"你已经不在恋爱里，你在等一个结果。",
+     "先做一件小事就行：这周找两次她没参与的场合（不是约她，是你自己去），看看你回来之后还想不想发消息。想发就发，那时候发是正常社交，不发也没关系。"],
+  fix:["定一条硬规则：一天最多主动联系一次，超了就明天再说。这条规则的作用不是冷淡，是把选择权还回你自己手里。",
+       "想发的话先写进「冷静期」，不要直接发。写完等 24 小时，你会有一半的消息自己删掉。",
+       "找一个人把这件事说出来。不是让他评价，是说出来之后你自己会看清。憋着才会越滚越大。"]},
+ {min:18,max:25,k:"r",n:"中度失衡",tag:"资深舔狗",t:"你已经不在恋爱里，你在等一个结果。",
   b:["这个分数下，你大部分情绪的波动来源已经不是她做了什么，而是你今天有没有得到回应。12 道题里你至少 6 道选了失衡那一侧，这不是巧合。",
      "具体表现大概是：她在的时候你很好，她一忙你开始翻聊天记录找语气问题；你说不出口的不是「想她」，是「她是不是没那么喜欢我」。",
      "建议做两件事。第一，把「我们到底什么关系」问出来，别再试探了——你现在所有的不确定都是自己给自己留的悬念，而悬念会一直耗着你。第二，问之前想好答案：如果她说「没想过」，你要能接受，不能接受就别问，问了只是逼她表态。",
-     "如果问完发现她给的是含糊答案，那本身就是答案，只是不好听。"]},
- {min:26,max:36,k:"r",n:"重度失衡",t:"说句不好听的：你现在的状态不叫喜欢，叫损耗。",
+     "如果问完发现她给的是含糊答案，那本身就是答案，只是不好听。"],
+  fix:["把「我们到底算什么」问出来，挑一个具体的时机，别再拖。这一句问完，你至少能停止每天猜。",
+       "问之前先把三种答案都想过：她说「在一起」你怎么办，「再看看」怎么办，「没想过」怎么办。想不清楚就别问。",
+       "接下来两周把联系频率降到现在的三分之一。目的不是让她回头，是让你看清——没有高频联系时，你到底还喜不喜欢她。",
+       "如果她明确说过「别联系」，或者你们其实各有对象而你在介入，那这次谈话的前提是停下，不是谈。"]},
+ {min:26,max:36,k:"r",n:"重度失衡",tag:"天下第一舔",t:"说句不好听的：你现在的状态不叫喜欢，叫损耗。",
   b:["12 题几乎全在失衡侧。这通常意味着你已经把这段关系当成生活的支撑结构了——它塌一点，你整个人就晃。",
      "此时你最该做的不是想办法让她更喜欢你，是先把自己捞回来。因为你现在做的每一个「追」的动作，效果都不是加分，是让她更知道怎么应付你。",
      "接下来一周：不见她、不联系她、把想发的都写进冷静期。不是赌气，是让你看清楚——你到底还喜不喜欢她，还是只是不甘心。不甘心和喜欢，长得特别像，但处理方式完全不一样。",
      "一周之后如果你还是想找她，那就想清楚一件事：你是想和她在一起，还是想结束那种等着的状态。这两个答案不冲突，但需要的做法不一样。",
-     "如果她之前明确说过「别联系了」或者你们其实已经有对象而你在介入——那这一栏的答案不是策略问题，是停下。"]
-}];
+     "如果她之前明确说过「别联系了」或者你们其实已经有对象而你在介入——那这一栏的答案不是策略问题，是停下。"],
+  fix:["第一件：一周不见她。这不是欲擒故纵，是止损测试。一周里把时间填满——上班、健身、见朋友、出门走路都行。",
+       "第二件：算一笔账。把这一个多月花的钱、搭进去的时间、推掉的局列出来。这个数字会让你不舒服，而你需要看到它。",
+       "第三件：分清两件事——你要的是「跟她在一起」，还是「结束现在这种等着的感觉」。两个答案不一样，需要做的事也不一样。",
+       "第四件：如果她已经明确拒绝过，或者你清楚你们各有对象，以上三条全省，直接停。这不叫认输，叫把自己捡回来。",
+       "真走出来之后你会发现，之前那套加码、试探、找话题的方法从来没起过作用。止损才是唯一一直有效的那招。"]}
+];
 
 /* =================== store =================== */
 const K="tgg_v1";
@@ -455,9 +500,25 @@ function drawQ(){
   $("#qbar").style.width=((qi)/QS.length*100)+"%";
   $("#q-back").disabled=qi===0;
   $("#q-next").textContent=qi===QS.length-1?"看结果":"下一题";
+  // 提示当前题是否已作答，避免"点了没反应"
+  if(ans[qi]===-1){
+    $("#q-tip").textContent=qi===QS.length-1?"最后一题，选完才能出结果":"这题还没选";
+    $("#q-tip").className="tip warn";
+  }else{
+    $("#q-tip").textContent="";
+    $("#q-tip").className="tip";
+  }
 }
 $("#q-next").onclick=()=>{
-  if(ans[qi]===-1) return;
+  if(ans[qi]===-1){
+    // 修复：原来静默 return，用户以为按钮坏了。改为高亮提示并滚动到题目
+    const box=$("#qbox");
+    box.classList.remove("shake"); void box.offsetWidth; box.classList.add("shake");
+    const t=$("#q-tip");
+    t.textContent=qi===QS.length-1?"这道题还没选，选完才能出结果":"这道题还没选";
+    t.className="tip warn";
+    return;
+  }
   if(qi<QS.length-1){qi++;drawQ();}
   else showRes();
 };
@@ -480,18 +541,24 @@ function showRes(){
     <h2>结果</h2>
     <p class="hint">${esc(new Date().toLocaleDateString("zh-CN"))} · 满分 36</p>
     <div class="score">${sc}<span style="font-size:17px;color:var(--faint);font-weight:500"> / 36</span></div>
-    <div class="lv ${L.k}">${L.n} · 失衡占比 ${pct}%</div>
+    <div class="lv ${L.k}">${esc(L.tag)}</div>
+    <div class="lvsub">${esc(L.n)} · 失衡占比 ${pct}%</div>
     <div class="res-body">
       <p style="color:var(--muted)">${esc(L.t)}</p>
       <ul class="res-list">${L.b.map(x=>`<li>${esc(x)}</li>`).join("")}</ul>
-      ${marks.length?`<div class="res-foot">你在这 ${marks.length} 道题上选了失衡那一侧：<br>· ${marks.map(esc).join("<br>· ")}</div>`:`<div class="res-foot">12 道题全部选在健康或中间那一侧，没什么明显的失衡信号。</div>`}
+      ${marks.length?`<div class="res-foot">你在这 ${marks.length} 道题上选了失衡那一侧：<br>· ${marks.map(m=>esc(m)).join("<br>· ")}</div>`:`<div class="res-foot">12 道题全部选在健康或中间那一侧，没什么明显的失衡信号。</div>`}
+    </div>
+    <div class="fixbox">
+      <div class="fix-t">怎么脱离这一档</div>
+      <ol class="fix-l">${L.fix.map(x=>`<li>${esc(x)}</li>`).join("")}</ol>
     </div>
     <div style="display:flex;gap:9px;margin-top:16px">
-      <button class="btn ghost sm" style="flex:1" onclick="window.scrollTo({top:0,behavior:'smooth'})">回去看我的选择</button>
+      <button class="btn ghost sm" id="q-top" style="flex:1">回去看我的选择</button>
       <button class="btn" style="flex:1" id="q-again">重新测</button>
     </div>
     <div class="note">这个分数只反映你现在的投入和感受，不评价她，也不预测结果。别拿它当判决，也别为了好看故意选健康那一侧——选了不准，后面的建议就没用了。</div>
   </div>`;
+  $("#q-top").onclick=()=>window.scrollTo({top:0,behavior:"smooth"});
   $("#q-again").onclick=()=>{qi=0;ans.fill(-1);$("#q-result").innerHTML="";drawQ();window.scrollTo({top:0,behavior:"smooth"});};
   wrap.scrollIntoView({behavior:"smooth",block:"start"});
 }
@@ -506,6 +573,8 @@ CATS.forEach(c=>{
   $("#qchips").appendChild(b);
 });
 function drawQ2(){
+  const cnt=$("#q-count");
+  if(cnt) cnt.textContent=QUOTES.length+" 条常见操作。每条都写了实际效果和一个改法。点开看。";
   const L=QUOTES.map((q,i)=>({...q,i})).filter(q=>cat==="全部"||q.c===cat);
   $("#qlist").innerHTML=L.map(q=>`
     <div class="qc" data-i="${q.i}">
@@ -661,7 +730,7 @@ function renderMe(){
   if(S.tests.length>=1)got.add("t1");
   if(S.tests.length>=3)got.add("t3");
   if(S.read.length>=10)got.add("q10");
-  if(S.read.length>=24)got.add("q24");
+  if(S.read.length>=QUOTES.length)got.add("q24");
   if(gone>=1)got.add("h1");
   if(gone>=5)got.add("h5");
   if(held>=20)got.add("h20");
